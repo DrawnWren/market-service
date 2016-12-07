@@ -1,0 +1,24 @@
+{
+  "name": "market-service",
+  "version": "1.0.0",
+  "description": "Retrieves bitcoin prices from various markets and populates redis with the relevant information",
+  "main": "poloniex.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DrawnWren/market-service.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DrawnWren/market-service/issues"
+  },
+  "homepage": "https://github.com/DrawnWren/market-service#readme",
+  "dependencies": {
+    "autobahn": "^0.11.1",
+    "bluebird": "^3.4.6",
+    "redis": "^2.6.3"
+  }
+}
