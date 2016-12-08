@@ -11,8 +11,7 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
-// returns a promise that represents the status of the S3 upload
-module.exports = (Key, obj) => {
+function upload (Key, obj) {
   const params = {
     Bucket,
     Key,
@@ -29,5 +28,11 @@ module.exports = (Key, obj) => {
  });
 }
 
-
-
+// returns a promise that represents the status of the S3 upload
+module.exports = (results, pair, exchange) => {
+  const time = new Date().getTime();
+  const Key = `${exchange}/${pair}/${time}`;
+  upload(Key, results)
+  .then( () => console.log(`Upload success, ${time}`) )
+  .catch( err => console.log(`Upload error, ${err}`) );
+}
