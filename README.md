@@ -1,2 +1,2 @@
 # market-service
-Retrieves bitcoin prices from various markets and populates redis with the relevant information
+Retrieves bitcoin prices from various markets and uploads them to S3.
