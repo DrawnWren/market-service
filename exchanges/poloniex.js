@@ -24,6 +24,10 @@ function toS3 (results, pair) {
 
 // close over pair and time so open can be reused
 function open (connection, pair, time, depth, callback) {
+  connection.pair = pair;
+  connection.time = time;
+  connection.depth = depth;
+  connection.callback = callback;
 
   connection.onopen = function (session) {
 
@@ -60,6 +64,7 @@ function open (connection, pair, time, depth, callback) {
 
 connection.onclose = function () {
   console.log("Websocket connection closed");
+  open(this, this.pair, this.time, this.depth, this.callback);
 }
 
 open(connection, 'USDT_BTC', 3600000, 1000, toS3);

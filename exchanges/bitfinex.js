@@ -1,8 +1,14 @@
 const BitfinexWS = require('bitfinex-api-node').WS;
+const upload = require('../util/upload');
 
-module.exports = (pair, time, callback) => {
+function toS3(results, pair) {
+  return upload(results, pair, 'bitfinex');
+}
+
+function doit (pair, time, callback) {
   const bws = new BitfinexWS();
-  let trades, books = [];
+  let trades = [];
+  let books = [];
 
   bws.on('open', () => {
     bws.subscribeTrades(pair);
@@ -22,6 +28,8 @@ module.exports = (pair, time, callback) => {
   bws.on('error', console.error);
 
   setInterval(() => {
-    callback({ books, trades });
+    callback({ books, trades }, pair);
   }, time);
 };
+
+doit('BTCUSD', 3600000, toS3);
