@@ -1,5 +1,6 @@
 const autobahn = require('autobahn');
 const request = require('request');
+const upload = require('./upload');
 
 const wsURI = 'wss://api.poloniex.com';
 const restURI = 'https://poloniex.com/public?command=returnOrderBook&currencyPair='
@@ -18,13 +19,21 @@ function get (url) {
   });
 }
 
-function process(results) {
+function log(results) {
   console.log(`orderBook ${results.orderBook.orders.length}, activity ${results.activity.length}
   time ${results.orderBook.resTime - results.orderBook.reqTime}`);
 }
 
+function toS3(results, pair) {
+  const time = new Date().getTime();
+  const Key = `poloniex/${pair}/${time}`;
+  upload(Key, results)
+  .then( () => console.log(`Upload success, ${time}`) )
+  .catch( err => console.log(`Upload error, ${err}`) );
+}
+
 // close over pair and time so open can be reused
-function open (connection, pair, time, depth) {
+function open (connection, pair, time, depth, callback) {
 
   connection.onopen = function (session) {
 
@@ -44,7 +53,7 @@ function open (connection, pair, time, depth) {
       .then(res => {
         const resTime = new Date().getTime();
         const orderBook = {orders: res.body, resTime, reqTime };
-        process({ orderBook, activity });
+        callback({ orderBook, activity }, pair);
         activity = [];
       })
       .catch( err => console.log(err) );
@@ -61,5 +70,5 @@ connection.onclose = function () {
   console.log("Websocket connection closed");
 }
 		       
-open(connection, 'USDT_BTC', 60000, 10000);
+open(connection, 'USDT_BTC', 60000, 1000, toS3);
 
