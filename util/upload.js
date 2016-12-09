@@ -33,6 +33,6 @@ module.exports = (results, pair, exchange) => {
   const time = new Date().getTime();
   const Key = `${exchange}/${pair}/${time}`;
   upload(Key, results)
-  .then( () => console.log(`Upload success, ${time}`) )
+  .then( () => console.log(`${exchange} Upload success, ${time}`) )
   .catch( err => console.log(`Upload error, ${err}`) );
 }

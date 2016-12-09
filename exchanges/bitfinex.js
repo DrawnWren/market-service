@@ -1,11 +1,6 @@
 const BitfinexWS = require('bitfinex-api-node').WS;
-const upload = require('../util/upload');
 
-function toS3(results, pair) {
-  return upload(results, pair, 'bitfinex');
-}
-
-function doit (pair, time, callback) {
+function bitfinex (pair, time, callback) {
   const bws = new BitfinexWS();
   let trades = [];
   let books = [];
@@ -27,9 +22,17 @@ function doit (pair, time, callback) {
   
   bws.on('error', console.error);
 
+  bws.on('close', () => {
+    console.log('Websocket closed.');
+    bitfinex(pair, time, callback);
+  });
+
   setInterval(() => {
     callback({ books, trades }, pair);
+    books = [];
+    trades = [];
   }, time);
 };
 
-doit('BTCUSD', 3600000, toS3);
+
+module.exports = bitfinex;
