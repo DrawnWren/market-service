@@ -1,6 +1,6 @@
 const BitfinexWS = require('bitfinex-api-node').WS;
 
-function bitfinex (pair, time, callback) {
+function bitfinex(pair, time, callback) {
   const bws = new BitfinexWS();
   let trades = [];
   let books = [];
@@ -9,21 +9,21 @@ function bitfinex (pair, time, callback) {
     bws.subscribeTrades(pair);
     bws.subscribeOrderBook(pair);
   });
-  
-  bws.on('trade', (pair, trade) => {
+
+  bws.on('trade', (_, trade) => {
     const proTime = new Date().getTime();
     trades.push({ trade, proTime });
   });
 
-  bws.on('orderbook', (pair, book) => {
+  bws.on('orderbook', (_, book) => {
     const proTime = new Date().getTime();
     books.push({ book, proTime });
   });
-  
+
   bws.on('error', console.error);
 
   bws.on('close', () => {
-    console.log('Websocket closed.');
+    console.log('Bitfinex websocket closed.');
     bitfinex(pair, time, callback);
   });
 
@@ -32,7 +32,7 @@ function bitfinex (pair, time, callback) {
     books = [];
     trades = [];
   }, time);
-};
+}
 
 
 module.exports = bitfinex;

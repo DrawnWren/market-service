@@ -34,6 +34,7 @@ function establish (subscriptions) {
   });
 
   ws.on('close', () => {
+    console.log('Bitmex websocket closed.');
     ws = establish(subscriptions);
   });
 

@@ -1,71 +1,67 @@
 const autobahn = require('autobahn');
-const upload = require('../util/upload');
 const get = require('../util/rest').get;
 
 const wsURI = 'wss://api.poloniex.com';
-const restURI = 'https://poloniex.com/public?command=returnOrderBook&currencyPair='
+const restURI = 'https://poloniex.com/public?command=returnOrderBook&currencyPair=';
 
-const connection = new autobahn.Connection({
-  url: wsURI,
-  realm: "realm1"
-});
-
-
-
+/*
 function log(results) {
   console.log(`orderBook ${results.orderBook.orders.length}, activity ${results.activity.length}
   time ${results.orderBook.resTime - results.orderBook.reqTime}`);
+};
+*/
+function getOrders(pair, depth) {
+  return get(`${restURI}${pair}&depth=${depth}`);
 }
-
-function toS3 (results, pair) {
-  return upload(results, pair, 'poloniex');
-}
-
 
 // close over pair and time so open can be reused
-function open (connection, pair, time, depth, callback) {
-  connection.pair = pair;
-  connection.time = time;
-  connection.depth = depth;
-  connection.callback = callback;
+function poloniex(pair, time, callback) {
+  const ws = new autobahn.Connection({
+    url: wsURI,
+    realm: 'realm1',
+  });
 
-  connection.onopen = function (session) {
+  ws.pair = pair;
+  ws.time = time;
+  ws.depth = 1000;
+  ws.callback = callback;
 
-    let activity = []; 
+  ws.onopen = function (session) {
+    let activity = [];
 
-    console.log(pair, time);
-
-    function marketEvent (args,kwargs) {
-      let act = {};
+    function marketEvent(args) {
+      const act = {};
       act.actions = args;
       act.proTime = new Date().getTime();
       activity.push(act);
     }
 
+    let reqTime = new Date().getTime();
+    let orders = getOrders(ws.pair, ws.depth);
+
     setInterval(() => {
       // try with no depth parameter set
-      const reqTime = new Date().getTime();
-      get(`${restURI}${pair}&depth=${depth}`)
-      .then(res => {
-        const resTime = new Date().getTime();
-        const orderBook = {orders: res.body, resTime, reqTime };
-        callback({ orderBook, activity }, pair);
-        activity = [];
-      })
-      .catch( err => console.log(err) );
+      orders
+        .then((res) => {
+          const resTime = new Date().getTime();
+          const orderBook = { orders: res.body, resTime, reqTime };
+          callback({ orderBook, activity }, pair);
+          orders = getOrders(ws.pair, ws.depth);
+          reqTime = new Date().getTime();
+          activity = [];
+        })
+      .catch(err => console.log(err));
     }, time);
 
-    
     session.subscribe(pair, marketEvent);
-  }
+  };
 
-  connection.open();
+  ws.onclose = function () {
+    console.log('Poloniex websocket connection closed');
+    poloniex(ws, ws.pair, ws.time, ws.depth, ws.callback);
+  };
+
+  ws.open();
 }
 
-connection.onclose = function () {
-  console.log("Websocket connection closed");
-  open(this, this.pair, this.time, this.depth, this.callback);
-}
-
-open(connection, 'USDT_BTC', 3600000, 1000, toS3);
-
+module.exports = poloniex;
