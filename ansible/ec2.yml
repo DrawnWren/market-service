@@ -5,11 +5,11 @@
     ansible_ssh_private_key_file: "{{home_dir}}/.ssh/btcpie2.pem"
     remote_dir: "/home/{{ansible_ssh_user}}"
     local_aws_dir: "{{home_dir}}/.aws"
-    local_keyfile: "{{home_dir}}/.ssh/bitbucket"
-    remote_keyfile: "{{remote_dir}}/.ssh/bitbucket"
+    local_keyfile: "{{home_dir}}/.ssh/crednetials"
+    remote_keyfile: "{{remote_dir}}/.ssh/credentials"
   tasks:
     - name: install yum packages
-      apt: name={{item}} present=latest update_cache=yes
+      apt: name={{item}} state=latest update_cache=yes
       become: yes
       with_items: [git, npm]
 
@@ -18,8 +18,28 @@
 
     - name: local AWS creds and config
       copy: src={{local_aws_dir}}/{{item}} dest={{remote_dir}}/.aws/{{item}}
-      with_items: [config, credentials]
+      with_items: [credentials]
 
     - name: Deploy tightrope-services files from Bitbucket repository
-      git: repo=git@github.com/DrawnWren/market-service.git dest={{remote_dir}}/market-service
+      git: repo=https://github.com/DrawnWren/market-service.git dest={{remote_dir}}/market-service accept_hostkey=true
       tags: git
+
+    - name: Install service dependencies
+      npm: 
+        path: "{{remote_dir}}/market-service"
+
+    - name: Install pm2 and n
+      npm:
+        name: "{{item}}"
+        global: yes
+      with_items: [pm2, n]
+      sudo: true
+
+    - name: Install latest node with n
+      command: n latest
+      sudo: true
+
+    - name: Run market-service/main with pm2
+      command: pm2 start {{remote_dir}}/market-service/main.js
+
+
