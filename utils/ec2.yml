@@ -1,0 +1,25 @@
+- hosts: tag_btcpie_true
+  vars:
+    home_dir: /Users/drew
+    ansible_ssh_user: ubuntu
+    ansible_ssh_private_key_file: "{{home_dir}}/.ssh/btcpie2.pem"
+    remote_dir: "/home/{{ansible_ssh_user}}"
+    local_aws_dir: "{{home_dir}}/.aws"
+    local_keyfile: "{{home_dir}}/.ssh/bitbucket"
+    remote_keyfile: "{{remote_dir}}/.ssh/bitbucket"
+  tasks:
+    - name: install yum packages
+      apt: name={{item}} present=latest update_cache=yes
+      become: yes
+      with_items: [git, npm]
+
+    - name: Creates .aws directory for user
+      file: path={{remote_dir}}/.aws state=directory
+
+    - name: local AWS creds and config
+      copy: src={{local_aws_dir}}/{{item}} dest={{remote_dir}}/.aws/{{item}}
+      with_items: [config, credentials]
+
+    - name: Deploy tightrope-services files from Bitbucket repository
+      git: repo=git@github.com/DrawnWren/market-service.git dest={{remote_dir}}/market-service
+      tags: git
