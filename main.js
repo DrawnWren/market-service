@@ -2,6 +2,7 @@ const bitmex = require('./exchanges/bitmex');
 const bitfinex = require('./exchanges/bitfinex');
 const poloniex = require('./exchanges/poloniex');
 const gdax = require('./exchanges/gdax');
+const taobizu = require('./exchanges/taobizu');
 
 const upload = require('./util/upload');
 
@@ -32,4 +33,18 @@ gdax(
   pair.gdax,
   time,
   results => upload(results, pair.gdax, 'gdax')
+);
+
+const cny = {
+  bitmex: 'XBC',
+  taobizu: 'BTC_CNY',
+};
+
+bitmex(cny.bitmex, time, results => upload(results, cny.bitmex, 'bitmex'));
+
+
+taobizu(
+  cny.taobizu, 
+  time,
+  results => upload(results, cny.taobizu, 'taobizu')
 );
