@@ -5,10 +5,9 @@ const baseURI = 'http://taobizu.com/trade/chart_json/market/';
 function taobizu(pair, time, callback) {
   let responses = [];
   setInterval(() => {
-  const uri = `${baseURI}${pair}`;
-  return get(uri)
-    .then( (response) => {
-      console.log('Response body,', response.body);
+    const uri = `${baseURI}${pair}`;
+    return get(uri)
+    .then((response) => {
       const proTime = new Date().getTime();
       responses.push({ proTime, response });
     })

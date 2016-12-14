@@ -2,35 +2,38 @@ const WebSocket = require('ws');
 
 const uri = 'wss://www.bitmex.com/realtime';
 
-function establish (subscriptions) {
-  let ws = new WebSocket(uri); 
+function establish(subscriptions) {
+  let ws = new WebSocket(uri);
 
   ws.results = {
     orderBookL2s: [],
     orderBook10s: [],
-    trades: []
+    trades: [],
   };
 
   ws.clearResults = () => {
-    Object.keys(ws.results).forEach(k => ws.results[k] = []);
-  }
+    Object.keys(ws.results).forEach((k) => {
+      ws.results[k] = [];
+      return true;
+    });
+  };
 
   ws.on('open', () => {
     ws.send(
-      JSON.stringify({ 
-        op: 'subscribe', 
-        args: subscriptions
+      JSON.stringify({
+        op: 'subscribe',
+        args: subscriptions,
       })
     );
   });
 
-  ws.on('message', (data, flags) => {
-    let msg = JSON.parse(data);
+  ws.on('message', (data) => {
+    const msg = JSON.parse(data);
     msg.proTime = new Date().getTime();
-    if (ws.results[`${msg.table}s`] == undefined) {
+    if (ws.results[`${msg.table}s`] === undefined) {
       console.log('BITMEX: Unlogged message ', msg);
     }
-    if(msg.table) ws.results[`${msg.table}s`].push(msg);
+    if (msg.table) ws.results[`${msg.table}s`].push(msg);
   });
 
   ws.on('close', () => {
@@ -41,20 +44,19 @@ function establish (subscriptions) {
   return ws;
 }
 
-function bitmex(pair, time, callback) => {
-  let subscriptions = [
-    `orderBook10:${pair}`, 
+function bitmex(pair, time, callback) {
+  const subscriptions = [
+    `orderBook10:${pair}`,
     `orderBookL2:${pair}`,
-    `trade:${pair}`
+    `trade:${pair}`,
   ];
 
-  let connection = establish(subscriptions);
-   
+  const connection = establish(subscriptions);
+
   setInterval(() => {
     callback(connection.results);
     connection.clearResults();
   }, time);
-
 }
 
 module.exports = bitmex;

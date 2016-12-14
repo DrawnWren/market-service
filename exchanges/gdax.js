@@ -45,7 +45,7 @@ function snapshot(pair) {
   return get(`${orderBookURI}`);
 }
 
-function gdax(pair, time, callback) => {
+function gdax(pair, time, callback) {
   const connection = establish(pair);
   // get a snapshot at the beginning of the window
   let orderBookSnapshot = snapshot(pair);
@@ -62,6 +62,6 @@ function gdax(pair, time, callback) => {
         connection.clearResults();
       });
   }, time);
-};
+}
 
 module.exports = gdax;

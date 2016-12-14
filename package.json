@@ -22,7 +22,8 @@
     "bitfinex-api-node": "^0.2.9",
     "bluebird": "^3.4.6",
     "redis": "^2.6.3",
-    "socket.io-client": "^0.9.16"
+    "socket.io-client": "^0.9.16",
+    "ws": "^1.1.1"
   },
   "devDependencies": {
     "eslint": "^3.12.0",

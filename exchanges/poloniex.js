@@ -58,7 +58,7 @@ function poloniex(pair, time, callback) {
 
   ws.onclose = function () {
     console.log('Poloniex websocket connection closed');
-    poloniex(ws.pair, ws.time,  ws.callback);
+    poloniex(ws.pair, ws.time, ws.callback);
   };
 
   ws.open();
