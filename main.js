@@ -37,7 +37,7 @@ gdax(
 
 const cny = {
   bitmex: 'XBC',
-  taobizu: 'BTC_CNY',
+  taobizu: 'btc_cny',
 };
 
 bitmex(cny.bitmex, time, results => upload(results, cny.bitmex, 'bitmex'));

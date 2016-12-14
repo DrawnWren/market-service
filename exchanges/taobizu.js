@@ -8,6 +8,7 @@ function taobizu(pair, time, callback) {
   const uri = `${baseURI}${pair}`;
   return get(uri)
     .then( (response) => {
+      console.log('Response body,', response.body);
       const proTime = new Date().getTime();
       responses.push({ proTime, response });
     })

@@ -41,7 +41,7 @@ function establish (subscriptions) {
   return ws;
 }
 
-var bitmex = (pair, time, callback) => {
+function bitmex(pair, time, callback) => {
   let subscriptions = [
     `orderBook10:${pair}`, 
     `orderBookL2:${pair}`,
